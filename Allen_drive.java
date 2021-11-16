@@ -23,36 +23,47 @@ public class template extends LinearOpMode {
     public void runOpMode() {
         
         // HardwareMapping goes here
-
+        leftFront = hardwareMap.dcMotor.get("leftF");
+        rightFront = hardwareMap.dcMotor.get("rightF");
+        leftRear = hardwareMap.dcMotor.get("leftR");
+        rightRear = hardwareMap.dcMotor.get("rightR");
 
         // Reversing direction goes here
-
+        rightFront.setDirection(DcMotor.Direction.REVERSE);
+        rightRear.setDirection(DcMotor.Direction.REVERSE);
         
         waitForStart();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            
-            idle();
+
+          // x & y are from left stick rotation is from right stick
+
+          double x = -gamepad1.left_stick_x;
+          double y = gamepad1.left_stick_y;
+          double rotation = -gamepad1.right_stick_x;
+
+          double wheelSpeeds[] = new double[4];
+
+          wheelSpeeds[0] = x + y + rotation;
+          wheelSpeeds[1] = -x + y - rotation;
+          wheelSpeeds[2] = -x + y + rotation;
+          wheelSpeeds[3] = x + y - rotation;
+
+          normalize(wheelSpeeds);
+
+          leftFront.setPower(wheelSpeeds[0]);
+          rightFront.setPower(wheelSpeeds[1]);
+          leftRear.setPower(wheelSpeeds[2]);
+          rightRear.setPower(wheelSpeeds[3]);
+
+
+          idle();
         }
     }
 
-    public void mecanumDrive_Cartesian(double x, double y, double rotation){
-      double wheelSpeeds[] = new double[4];
-
-      wheelSpeeds[0] = x + y + rotation;
-      wheelSpeeds[1] = -x + y - rotation;
-      wheelSpeeds[2] = -x + y + rotation;
-      wheelSpeeds[3] = x + y - rotation;
-
-      normalize(wheelSpeeds);
-
-      leftFront.setPower(wheelSpeeds[0]);
-      rightFront.setPower(wheelSpeeds[1]);
-      leftRear.setPower(wheelSpeeds[2]);
-      rightRear.setPower(wheelSpeeds[3]);
-    }   //mecanumDrive_Cartesian
-
+    
+    // i found this method from the internet. 
     private void normalize(double[] wheelSpeeds){
       double maxMagnitude = Math.abs(wheelSpeeds[0]);
 
