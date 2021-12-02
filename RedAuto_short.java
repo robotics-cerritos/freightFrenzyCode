@@ -11,31 +11,32 @@ import com.qualcomm.robotcore.util.Range;
 
 @TeleOp
 
-public class Allen_redAuto extends LinearOpMode {
+public class RedAuto_short extends LinearOpMode {
 
     // Variables go here
-    private ElapsedTime runtime = new ElapsedTime();
-    
-    //Wheels
+    private ElapsedTime runtime = new ElapsedTime();    
     private DcMotor  leftFront;
     private DcMotor  rightFront;
     private DcMotor  leftRear;
     private DcMotor  rightRear;
     
-    private DcMotor caraselM;
+    private CRServo caraselServo;
     
     @Override
     public void runOpMode() {
         
         // HardwareMapping goes here
+        
+        //Wheel motors
         leftFront = hardwareMap.dcMotor.get("leftF");
         rightFront = hardwareMap.dcMotor.get("rightF");
         leftRear = hardwareMap.dcMotor.get("leftR");
         rightRear = hardwareMap.dcMotor.get("rightR");
         
+        //Carasel motor
         caraselM = hardwareMap.dcMotor.get("caraselMotor");
         
-        
+        //Reversing Direction
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftRear.setDirection(DcMotor.Direction.REVERSE);
         
@@ -66,58 +67,9 @@ public class Allen_redAuto extends LinearOpMode {
         }
         runtime.reset();
         
-        //Go backward
-        while (opModeIsActive() && (runtime.seconds()<=0.6)) {
-            allPower(-1);
-            telemetry.addData("LeftF: ",leftFront.getPower() );
-            telemetry.addData("RightF: ",rightFront.getPower() );
-            telemetry.addData("LeftR: ",leftRear.getPower() );
-            telemetry.addData("RightR: ",rightRear.getPower() );
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.update();
-        }
-        runtime.reset();
-        
-        //Stop
-        while (opModeIsActive() && (runtime.seconds()<=0.3)) {
-            allPower(0);
-            telemetry.addData("LeftF: ",leftFront.getPower() );
-            telemetry.addData("RightF: ",rightFront.getPower() );
-            telemetry.addData("LeftR: ",leftRear.getPower() );
-            telemetry.addData("RightR: ",rightRear.getPower() );
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.update();
-        }
-        runtime.reset();
-        
-        //Turn Carasel Motor
-        while (opModeIsActive() && (runtime.seconds()<=5)) {
-            caraselM.setPower(1);
-            telemetry.addData("LeftF: ",leftFront.getPower() );
-            telemetry.addData("RightF: ",rightFront.getPower() );
-            telemetry.addData("LeftR: ",leftRear.getPower() );
-            telemetry.addData("RightR: ",rightRear.getPower() );
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.update();
-        }
-        runtime.reset();
-        
-        //Stop Carasel Motor
-        while (opModeIsActive() && (runtime.seconds()<=0.3)) {
-            caraselM.setPower(0);
-            telemetry.addData("LeftF: ",leftFront.getPower() );
-            telemetry.addData("RightF: ",rightFront.getPower() );
-            telemetry.addData("LeftR: ",leftRear.getPower() );
-            telemetry.addData("RightR: ",rightRear.getPower() );
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.update();
-        }
-        runtime.reset();
-        
-        
         //Go Forward
-        while (opModeIsActive() && (runtime.seconds()<= 2.7)) {
-            allPower(1.0);
+        while (opModeIsActive() && (runtime.seconds()<=1.5)) {
+            allPower(1);
             telemetry.addData("LeftF: ",leftFront.getPower() );
             telemetry.addData("RightF: ",rightFront.getPower() );
             telemetry.addData("LeftR: ",leftRear.getPower() );
