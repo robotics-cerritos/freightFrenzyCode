@@ -30,6 +30,10 @@ public class Allen_drive extends LinearOpMode {
     
     //Default Speed Value
     private double speed = 1;
+
+    //Carasel Boolean
+    private boolean caraselMove=false;
+
     @Override
     public void runOpMode() {
         
@@ -99,13 +103,17 @@ public class Allen_drive extends LinearOpMode {
             intakeS.setPosition(0.75);
           }
           
-          
           //Setting the speed of the carasel motor based on the right stick
+          
           if(gamepad2.dpad_up){
-           while (opModeIsActive() && (caraselM.getPower()<1)) {
-              caraselM.setPower(caraselM.getPower()+0.1);
+            caraselMove=true;
           }
-         caraselM.setPower(0);
+          while (caraselMove && opModeIsActive()) {
+            if((caraselM.getPower()<1)){
+              caraselM.setPower(caraselM.getPower()+0.1);
+            }
+            caraselM.setPower(0);
+            caraselMove = false;
           }
           
           telemetry.addData("Carasel Motor: ",caraselM.getPower());
