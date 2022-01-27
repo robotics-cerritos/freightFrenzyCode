@@ -22,8 +22,7 @@ public class Allen_drive extends LinearOpMode {
     private DcMotor rightRear;
     
     // Intake Servos
-    private Servo intakeS;
-    private Servo intakeClampS;
+    private DcMotor intakeM;
     
     //Carasel Motor
     private DcMotor caraselM;
@@ -33,6 +32,21 @@ public class Allen_drive extends LinearOpMode {
 
     //Carasel Boolean
     private boolean caraselMove=false;
+    
+    //Outtake Variables
+    private DcMotor outtakeM;
+    private Servo outtakeS;
+    private double RAISE_MAX = -1750;
+    private double RAISE_MIN = 10;
+    private double servoDropVal = 0.95;
+    private double servoRetractVal = 0.58;
+    private int groundLevelVal = -10;
+    private int firstLevelVal = -600;
+    private int secondLevelVal = -1050;
+    private int thirdLevelVal = -1600;
+    
+
+    
 
     @Override
     public void runOpMode() {
@@ -46,9 +60,15 @@ public class Allen_drive extends LinearOpMode {
         rightRear = hardwareMap.dcMotor.get("rightR");
         
         // Intake
-        intakeS = hardwareMap.servo.get("intakeS");
-        intakeClampS = hardwareMap.servo.get("intakeClampS");
+        intakeM = hardwareMap.dcMotor.get("intakeMotor");
         
+        // Outttake
+        outtakeM = hardwareMap.dcMotor.get("outtakeMotor");
+        outtakeS = hardwareMap.servo.get("outtakeServo");
+        
+        //outtakeM.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        //outtakeM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+      
         // Carasel Motor
         caraselM = hardwareMap.dcMotor.get("caraselMotor");
 
@@ -62,7 +82,7 @@ public class Allen_drive extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-          // x & y are from left stick
+          // x & y (strafing and forwards/backwards) are from left stick
           double x = -gamepad1.left_stick_x;
           double y = gamepad1.left_stick_y;
           // rotation is from right stick
@@ -78,6 +98,9 @@ public class Allen_drive extends LinearOpMode {
 
           normalize(wheelSpeeds);
           
+          // trigger to power intake
+          intakeM.setPower((gamepad2.right_trigger - gamepad2.left_trigger)*2);
+          
           //setting the speed of motors
           if(gamepad1.a){
             speed=1;
@@ -91,19 +114,10 @@ public class Allen_drive extends LinearOpMode {
           leftRear.setPower(speed*wheelSpeeds[2]);
           rightRear.setPower(speed*wheelSpeeds[3]);
           
-          // Setting intake positions based on dpad
-          if(gamepad1.dpad_down){
-            intakeClampS.setPosition(0.6);
-            sleep(700);
-            intakeS.setPosition(1);
-          }
-          else if(gamepad1.dpad_up){
-            intakeClampS.setPosition(0.3);
-            sleep(700);
-            intakeS.setPosition(0.75);
-          }
+          
           
           //Setting the speed of the carasel motor based on the right stick
+          
           
           if(gamepad2.dpad_up){
             caraselMove=true;
@@ -131,13 +145,67 @@ public class Allen_drive extends LinearOpMode {
             caraselMove = false;
           }
           
-          telemetry.addData("Carasel Motor: ",caraselM.getPower());
+          
+          // Encoder Outtake Control
+          if(outtakeM.getCurrentPosition() >= RAISE_MAX && outtakeM.getCurrentPosition() <= RAISE_MIN)
+          {
+            if(gamepad2.b){
+              outtakeMove(groundLevelVal); // Ground Level
+            }
+            if(gamepad2.a)
+            {
+              outtakeMove(firstLevelVal);// First Level
+            }
+            if(gamepad2.x){
+              outtakeMove(secondLevelVal);// Second Level
+            }
+            if(gamepad2.y){
+              outtakeMove(thirdLevelVal);// Third Level
+            }
+            if(gamepad2.left_bumper)
+            {
+              outtakeS.setPosition(servoRetractVal);
+            }
+            if(gamepad2.right_bumper)
+            {
+              outtakeS.setPosition(servoDropVal);
+            }
+          }
+          else
+          {
+            outtakeMove(groundLevelVal); //Ground Level
+          }
+          
+          
+          // Manual Outtake Control
+          /*
+          outtakeM.setPower((gamepad2.left_stick_y)/2);
+          if(outtakeM.getCurrentPosition() < RAISE_MAX){
+            outtakeM.setPower(0.2);
+            sleep(80);
+            outtakeM.setPower(0);
+          }
+          else if(outtakeM.getCurrentPosition() > RAISE_MIN){
+            outtakeM.setPower(-0.2);
+            sleep(80);
+            outtakeM.setPower(0);
+          }
+          if(gamepad2.x)
+            {
+              outtakeS.setPosition(servoRetractVal);
+            }
+            if(gamepad2.y)
+            {
+              outtakeS.setPosition(servoDropVal);
+            }
+          */
+          //telemetry.addData("Carasel Motor: ",caraselM.getPower());
           telemetry.addData("LeftF: ",leftFront.getPower() );
           telemetry.addData("RightF: ",rightFront.getPower() );
           telemetry.addData("LeftR: ",leftRear.getPower() );
           telemetry.addData("RightR: ",rightRear.getPower() );
-          telemetry.addData("IntakeS: ",intakeS.getPosition());
-          telemetry.addData("IntakeClampS: ",intakeClampS.getPosition() );
+          telemetry.addData("IntakeM: ",intakeM.getPower());
+          telemetry.addData("Outtake Encoder: ", outtakeM.getCurrentPosition());
           telemetry.update();
           idle();
         }
@@ -149,7 +217,9 @@ public class Allen_drive extends LinearOpMode {
       for (int i = 1; i < wheelSpeeds.length; i++){
         double magnitude = Math.abs(wheelSpeeds[i]);
         if (magnitude > maxMagnitude){
-          maxMagnitude = magnitude;
+      
+      
+        maxMagnitude = magnitude;
         }
       }
       //If the maximum wheel speed is greater than 1
@@ -160,4 +230,22 @@ public class Allen_drive extends LinearOpMode {
         }
       }
     }   //normalize
+    
+    
+    public void outtakeMove(int move)
+    {
+      outtakeM.setTargetPosition(move);
+      outtakeM.setPower(0.3);
+      outtakeM.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+      
+      
+      while(opModeIsActive() && outtakeM.isBusy());
+      {
+        leftFront.setPower(0);
+        leftRear.setPower(0);
+        rightFront.setPower(0);
+        rightRear.setPower(0);
+      }
+      
+    }
 }
