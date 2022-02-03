@@ -178,7 +178,6 @@ public class Allen_drive extends LinearOpMode {
           
           
           // Manual Outtake Control
-          /*
           outtakeM.setPower((gamepad2.left_stick_y)/2);
           if(outtakeM.getCurrentPosition() < RAISE_MAX){
             outtakeM.setPower(0.2);
@@ -198,7 +197,7 @@ public class Allen_drive extends LinearOpMode {
             {
               outtakeS.setPosition(servoDropVal);
             }
-          */
+       
           //telemetry.addData("Carasel Motor: ",caraselM.getPower());
           telemetry.addData("LeftF: ",leftFront.getPower() );
           telemetry.addData("RightF: ",rightFront.getPower() );
