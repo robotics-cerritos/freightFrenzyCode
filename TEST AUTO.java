@@ -1,58 +1,57 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-@Autonomous(name="BlueAuto_Left_Blockade", group="Linear Opmode")
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 
-public class BlueAuto_Left_Blockade extends LinearOpMode {
+@TeleOp
 
-    // Variables go here
-    private ElapsedTime runtime = new ElapsedTime();
+public class Test_Auto extends LinearOpMode {
+
+    // Variables go here  
+    //Wheel Motors 
+    private DcMotor leftFront;
+    private DcMotor rightFront;
+    private DcMotor leftRear;
+    private DcMotor rightRear;
     
-    //Wheels
-    private DcMotor  leftFront;
-    private DcMotor  rightFront;
-    private DcMotor  leftRear;
-    private DcMotor  rightRear;
+    // Intake Servos
+    private DcMotor intakeM;
     
-    private Servo outtakeS;
-    
+    //Carasel Motor
     private DcMotor caraselM;
     
-    @Override
-    public void runOpMode() {
+    //Default Speed Value
+    private double speed = 1;
+
+    //Carasel Boolean
+    private boolean caraselMove=false;
+    
+    //Outtake Variables
+    private DcMotor outtakeM;
+    private Servo outtakeS;
+    private double RAISE_MAX = -1750;
+    private double RAISE_MIN = 10;
+    private double servoDropVal = 0.95;
+    private double servoRetractVal = 0.58;
+    private int groundLevelVal = -10;
+    private int firstLevelVal = -600;
+    private int secondLevelVal = -1050;
+    private int thirdLevelVal = -1600;
+    
+    
+
+    outtakeS.setPosition(0.58);
         
-        // HardwareMapping goes here
-        
-        //Wheel motors
-        leftFront = hardwareMap.dcMotor.get("leftF");
-        rightFront = hardwareMap.dcMotor.get("rightF");
-        leftRear = hardwareMap.dcMotor.get("leftR");
-        rightRear = hardwareMap.dcMotor.get("rightR");
-        
-        //Outtake Servo
-        outtakeS = hardwareMap.servo.get("outtakeServo");
-        
-        //Carasel motor
-        caraselM = hardwareMap.dcMotor.get("caraselMotor");
-        
-        //Reversing Direction
-        leftFront.setDirection(DcMotor.Direction.REVERSE);
-        leftRear.setDirection(DcMotor.Direction.REVERSE);
-        
-        waitForStart();
-        
-        outtakeS.setPosition(0.58);
-        
-        runtime.reset();
+    runtime.reset();
       
       
         //Plan: Face Red Side - Forward, Rotate Left, Strafe Right, Forward

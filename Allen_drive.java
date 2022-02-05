@@ -9,6 +9,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+
 
 @TeleOp
 
@@ -44,7 +47,12 @@ public class Allen_drive extends LinearOpMode {
     private int firstLevelVal = -600;
     private int secondLevelVal = -1050;
     private int thirdLevelVal = -1600;
+
+    private boolean hasBlock = false;
     
+    private DistanceSensor sensorRange;
+    private double distanceThreshold = 5.0; 
+
 
     
 
@@ -65,6 +73,8 @@ public class Allen_drive extends LinearOpMode {
         // Outttake
         outtakeM = hardwareMap.dcMotor.get("outtakeMotor");
         outtakeS = hardwareMap.servo.get("outtakeServo");
+
+        sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
         
         //outtakeM.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         //outtakeM.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -98,8 +108,26 @@ public class Allen_drive extends LinearOpMode {
 
           normalize(wheelSpeeds);
           
-          // trigger to power intake
-          intakeM.setPower((gamepad2.right_trigger - gamepad2.left_trigger)*2);
+          //Intake
+          if(sensorRange.getDistance(DistanceUnit.CM))<blockThreshold){
+            hasBlock=true;
+          }
+          
+          // trigger to power intake 
+          // if there is no block then allow intake.
+          // if there is a block then stop intake.
+          if(!hasBlock){
+            intakeM.setPower((gamepad2.right_trigger - gamepad2.left_trigger)*2);
+          }else{
+            intakeM.setPower(0);
+          }
+
+          
+
+
+
+
+          
           
           //setting the speed of motors
           if(gamepad1.a){
@@ -169,6 +197,7 @@ public class Allen_drive extends LinearOpMode {
             if(gamepad2.right_bumper)
             {
               outtakeS.setPosition(servoDropVal);
+              hasBlock=false;
             }
           }
           else
